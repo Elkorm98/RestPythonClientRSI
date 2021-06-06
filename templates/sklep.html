@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<head>
+<title>Sklep</title>
+</head>
+
+<Body>
+<h1>Sklep MTG</h1>
+<h2>Witaj Łukasz Kosmaty!</h2>
+<h3>Twój stan konta: 1000000zł</h3>
+<p>
+ 
+  <form action="#" method = "post">
+     <input type="submit" value="Przejdz do koszyka" name="btn"> 
+</p>
+{% set count = namespace(value=0) %}
+{%for k in magazyn%}
+    <p>{{k['karta']['nazwa']}}</p>
+    <p>{{k['karta']['opis']}}</p>
+    <img src= "data:image/jpg;base64,{{ilustracje[count.value]}}" alt="{{k['karta']['nazwa']}}"/>
+    <p>Cena: {{k['cena']}} zł</p>
+    <p>Ilość dostępnych: {{k['na_stanie']}}</p>
+    
+      <input type="text" value = 0 name = "{{k['karta']['nazwa']}}">
+      {% set count.value = count.value + 1 %}
+      {%endfor%}
+      <p><input type="submit" name ="btn" value="Dodaj do koszyka" ></p>
+    </form>
+
+
+</body>
+

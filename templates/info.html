@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<head>
+    <title>Koszyk</title>
+    </head>
+    <table>
+
+    <td>
+    <body>
+        {%if ds['message'] =="zamowienie potwierdzone"%}
+        <h2>{{ds['dane_sklepu']['nazwa']}}</h2>
+        <p>Adres: {{ds['dane_sklepu']['adres']}}
+        {{ds['dane_sklepu']['miasto']}} 
+        {{ds['dane_sklepu']['kod_pocztowy']}}</p>
+        <p>Wlasciciel: {{ds['dane_sklepu']['wlasciciel']}}</p>
+        <p>email: {{ds['dane_sklepu']['email']}}</p>
+        <p>NIP: {{ds['dane_sklepu']['NIP']}}</p>
+        <br/>
+    <p>
+        {%for i in ds['koszyk']%}
+           [ {{i['karta']['nazwa']}} ] <br/>
+            Cena: {{i['cena']}}
+            Liczba sztuk:{{i['na_stanie']}}
+            Razem: {{i['wartosc_razem']}}zł<br/>
+        {%endfor%}
+    </p>
+    <h1>Łączna Kwota: {{ds['kwota']}}zł</h1>
+    
+    
+    <form action = "#" method="POST">
+       <input type ="submit" name = "btn" value="Pobierz potwierdzenie">
+       </form>
+
+<p>{{ds['message']}}</p>
+<form action = "#" method="POST">
+   <input type ="submit" name = "btn" value="Powrot do sklepu">
+   </form> 
+    </td>
+    <td>
+        <p>Imie i nazwisko: {{ds['dane_klienta']['imie']}} {{ds['dane_klienta']['nazwisko']}}</p>
+        <p>Adres: {{ds['dane_klienta']['adres']}}
+            {{ds['dane_klienta']['miasto']}} 
+            {{ds['dane_klienta']['kod_pocztowy']}}
+            </p>
+        <p>email: {{ds['dane_klienta']['email']}}</p>
+        <p>nr tel. : {{ds['dane_klienta']['numer_telefonu']}}</p>
+        {%endif%}
+    </td>
+   
+    </body>
+    
+    </html>
+ 
