@@ -3,11 +3,15 @@ from flask import Flask,redirect, url_for, render_template, request
 import requests
 import pdfkit
 
+
+c = 0
 dane =""
-url = "http://25.76.141.122:8080/RestProjectServer/webresources/"
+url = "http://25.76.141.122:8081/RestProjectServer/webresources/"
 url_koszyk = ""
 login_ = ""
 password_ = ""
+magazynj = []
+danej = []
 app = Flask(__name__)
 
 @app.route('/logowanie',methods=["POST","GET"])
@@ -15,6 +19,7 @@ def logowanie():
     if request.method == "POST":
         global login_
         global password_
+        global magazynj
         login_ = request.form["nm"]
         password_ = request.form["ps"]
         headers = {'login': login_, 'haslo': password_ }
@@ -31,11 +36,9 @@ def logowanie():
 @app.route('/Sklep/',methods =["POST","GET"])
 def sklep():
     global url_koszyk
-    headers = {'login': login_,'haslo': password_}
-    magazyn = requests.get(url+"sklep", headers=headers)
-    magazynj = magazyn.json()
+    
     url_koszyk = magazynj[0]['koszyk_link']['uri']
-    konto = requests.get(url+"sklep/"+"konto")
+    konto = requests.get("http://25.76.141.122:8080/RestProjectServer/webresources/"+"sklep/"+"konto")
     kontoj = konto.json()
     ilustracjebase64 = []
     idilosc = []
@@ -58,6 +61,8 @@ def sklep():
 
 @app.route("/koszyk/",methods = ["POST","GET"])
 def koszyk():
+    global c 
+    c = 0
     koszyk = requests.get(url_koszyk)
     koszykj = koszyk.json()
     if request.method == "POST":
@@ -78,19 +83,36 @@ def koszyk():
 @app.route('/info/potwierdzenie/',methods = ["POST","GET"])
 def info():
     config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
-    
-    dane = requests.post(url_koszyk)
-    danej = dane.json()
-   
+    headers = {'login': login_, 'haslo': password_ }
+    global magazynj
+    global danej
+    global c
+    if c == 0:
+        dane = requests.post(url_koszyk)
+        danej = dane.json()
+        c = 1
     if request.method == "POST":
         rf = request.form["btn"]
         if rf=="Powrot do sklepu":
-          return redirect(url_for("sklep"))
+            magazyn = requests.get(url+"sklep", headers = headers)
+            magazynj = magazyn.json()
+            return redirect(url_for("sklep"))
         elif rf == "Pobierz potwierdzenie":
-            pdfkit.from_url("http://127.0.0.1:5000/info/potwierdzenie/#", 'Potwierdzenie.pdf', configuration=config)
+            magazyn = requests.get(url+"sklep", headers = headers)
+            magazynj = magazyn.json()
+            pdfkit.from_url("http://127.0.0.1:5000/info/potwierdzenie/#", 'Potwierdzenieeeee.pdf', configuration=config)
             return redirect(url_for("sklep"))
     else:
         return render_template("info.html", ds = danej)
+
+
+@app.route("/printstrona/")
+def printstrona():
+    global danej
+    render_template("info.html", ds = danej)
+    config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
+    pdfkit.from_url("http://127.0.0.1:5000/printstrona/", 'Potwierdzenieeeee.pdf', configuration=config)
+    return redirect(url_for("sklep"))
     
 
 if __name__ == '__main__':
