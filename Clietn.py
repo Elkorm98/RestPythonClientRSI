@@ -35,6 +35,8 @@ def sklep():
     magazyn = requests.get(url+"sklep", headers=headers)
     magazynj = magazyn.json()
     url_koszyk = magazynj[0]['koszyk_link']['uri']
+    konto = requests.get(url+"sklep/"+"konto")
+    kontoj = konto.json()
     ilustracjebase64 = []
     idilosc = []
     for k in magazynj:
@@ -47,11 +49,11 @@ def sklep():
                 if request.form[str(i['karta']['nazwa'])] != "0":
                     ilosc = request.form[str(i['karta']['nazwa'])]
                     requests.put(i['self']['uri'],params={'ilosc': ilosc})
-            return render_template("sklep.html",magazyn = magazynj,ilustracje = ilustracjebase64,idilosc=idilosc)
+            return render_template("sklep.html",magazyn = magazynj,ilustracje = ilustracjebase64,idilosc=idilosc,konto = kontoj)
         if request.form["btn"] == "Przejdz do koszyka":
             return redirect(url_for("koszyk"))
     else:
-        return render_template("sklep.html",magazyn = magazynj,ilustracje = ilustracjebase64,idilosc=idilosc)
+        return render_template("sklep.html",magazyn = magazynj,ilustracje = ilustracjebase64,idilosc=idilosc,konto = kontoj)
 
 
 @app.route("/koszyk/",methods = ["POST","GET"])
@@ -73,18 +75,19 @@ def koszyk():
         return render_template("koszyk.html",koszyk = koszykj)
 
 
-@app.route('/info/',methods = ["POST","GET"])
+@app.route('/info/potwierdzenie/',methods = ["POST","GET"])
 def info():
+    config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
+    
     dane = requests.post(url_koszyk)
     danej = dane.json()
-    pprint(danej)
+   
     if request.method == "POST":
         rf = request.form["btn"]
         if rf=="Powrot do sklepu":
           return redirect(url_for("sklep"))
         elif rf == "Pobierz potwierdzenie":
-            config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
-            pdfkit.from_url("http://127.0.0.1:5000/info/#", 'Potwierdzenie.pdf', configuration=config)
+            pdfkit.from_url("http://127.0.0.1:5000/info/potwierdzenie/#", 'Potwierdzenie.pdf', configuration=config)
             return redirect(url_for("sklep"))
     else:
         return render_template("info.html", ds = danej)
